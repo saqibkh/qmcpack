@@ -137,6 +137,19 @@ jobs:
         run: |
           echo "triggered=true" >> $GITHUB_OUTPUT
 
+      # Optional GPU health check (pantheongpu/gpu-health-check): a short stress test that fails
+      # the job if the card is faulty. It needs nvcc on PATH; the Configure step adds the same directory.
+      - name: Add CUDA to PATH for the GPU health check
+        if: steps.check.outputs.triggered == 'true'
+        run: echo /usr/local/cuda/bin >> "$GITHUB_PATH"
+
+      - name: GPU health check
+        if: steps.check.outputs.triggered == 'true'
+        uses: pantheongpu/gpu-health-check@1913a4746f390e2ae8849173c127954e154d9e5e # v0.1.1
+        with:
+          duration: 30
+          upload-report: 'false'
+
       # Request repo info, required since issue_comment doesn't point at PR commit, but develop
       - name: GitHub API Request
         if: steps.check.outputs.triggered == 'true'
@@ -232,6 +245,15 @@ jobs:
         id: check
         run: |
           echo "triggered=true" >> $GITHUB_OUTPUT
+
+      # Optional GPU health check (pantheongpu/gpu-health-check): a short stress test that fails
+      # the job if the card is faulty. It needs hipcc on PATH.
+      - name: GPU health check
+        if: steps.check.outputs.triggered == 'true'
+        uses: pantheongpu/gpu-health-check@1913a4746f390e2ae8849173c127954e154d9e5e # v0.1.1
+        with:
+          duration: 30
+          upload-report: 'false'
 
       # Request repo info, required since issue_comment doesn't point at PR commit, but develop
       - name: GitHub API Request
